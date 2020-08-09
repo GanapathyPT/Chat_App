@@ -1,0 +1,118 @@
+* {
+	transition: 1s background-color;
+}
+
+body {
+	font-family: 'Luckiest Guy', cursive;
+	letter-spacing: .2rem;
+}
+
+form {
+	display: flex;
+	position: fixed;
+	bottom: 0;
+	left: 50vh;
+	right: 50vh;
+}
+
+.heading {
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	margin: 10px;
+}
+
+.sun,
+.moon {
+	cursor: pointer;
+	float: right;
+}
+
+.moon {
+	opacity: 0;
+}
+
+.chatting-area {
+	padding: 0;
+	height: 80vh;
+	overflow-y: auto;
+}
+
+.message {
+	list-style: none;
+	max-width: 50%;
+	margin-bottom: 5px;
+	border-radius: 5px;
+	color: white;
+	padding: 10px;
+	text-align: center;
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+.message small {
+	font-size: 10px;
+}
+
+.message p {
+	margin: 0;
+	word-break: break-all;
+}
+
+.ourMessage {
+	margin-left: auto;
+	text-align: right;
+}
+
+.container {
+	margin-left: 30%;
+	margin-right: 30%;
+	width: auto;
+}
+
+.dark {
+	background-color: #333;
+	color: white;
+}
+
+.dark .moon {
+	opacity: 1;
+}
+
+.dark .sun {
+	opacity: 0;
+}
+
+.dark input {
+	background-color: #333;
+	color: white;
+}
+
+.dark input:focus,
+.dark input:hover
+ {
+	outline: none;
+	border: none;
+	box-shadow: none;
+	background-color: #444;
+	color: white;
+}
+
+.dark .message,
+.dark .bg-primary {
+	background-color: #444 !important;
+	color: white;
+}
+
+@media (max-width: 600px) {
+	form {
+		left: 3vh;
+		right: 3vh;
+	}
+
+	.container {
+		margin-left: 2%;
+		margin-right: 2%;
+	}
+}
