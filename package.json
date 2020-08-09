@@ -1,14 +1,17 @@
 {
   "name": "chatApp",
   "version": "1.0.0",
-  "description": "",
+  "description": "simple node app implemented without database",
   "main": "index.js",
   "scripts": {
     "start": "node index",
     "devStart": "nodemon index"
   },
+  "engines": {
+    "node": "12.18.2"
+  },
   "keywords": [],
-  "author": "",
+  "author": "GanapathyPT",
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
