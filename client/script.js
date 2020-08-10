@@ -7,20 +7,49 @@ const sendButton = document.getElementById('sendButton');
 const moon = document.getElementById('moon');
 const sun = document.getElementById('sun');
 const alerts = document.getElementById('alerts');
+const modal = document.getElementById('modal');
+const nameForm = document.getElementById('nameForm');
+const name = document.getElementById('name');
 
 // getting the total number of messages in the chat
-let messageNumber = 0;
-const windowheight = window.screen.height;
-
-// getting the name
-const userName = prompt('Your Name:');
-
+const windowHeight = window.screen.height;
 const validText = /^[0-9a-zA-Z]+$/;
 
-if (!userName || userName.length <= 3 || !userName.match(validText)){
-	addAlert('Not a valid Username', 'danger');
-	sendButton.disabled = true;
-}
+let messageNumber = 0;
+
+// getting the name
+let userName = localStorage.getItem('name');
+// get mode preference
+let mode = localStorage.getItem('mode') || 'light';
+
+
+if (!userName)
+	promptUser();
+
+if (mode === 'dark')
+	toggleDarkMode();
+
+
+const socket = io("/");
+
+if (userName)
+	socket.emit('user_connected', userName);
+
+// adding the message in UI if got one
+socket.on('message_received', (data) => {
+	addChild(data);
+})
+
+// intimates if a user had left the chat
+socket.on('user_disconnected', userName => {
+	addAlert(`${userName} disconnected`, 'danger');
+});
+
+// intimates if a user joins
+socket.on('new_user', userName => {
+	addAlert(`${userName} connected`, 'success');
+});
+
 
 // submit listener
 formInput.addEventListener('submit', e => {
@@ -34,40 +63,27 @@ formInput.addEventListener('submit', e => {
 	message.value = '';
 });
 
-
-const socket = io("/");
-
-socket.emit('user_connected', userName);
-
-socket.on('already_exists', userName => {
-	addAlert('Username Already Exists', 'danger');
+function promptUser() {
+	userName = localStorage.getItem("name");
 	sendButton.disabled = true;
-})
-
-// adding the message in UI if got one
-socket.on('message_received', (data) => {
-	addChild(data);
-})
-
-// intimates if a user had left the chat
-socket.on('user_disconnected', userName => {
-	console.log(`${userName} disconnected`);
-	addAlert(`${userName} disconnected`, 'danger');
-});
-
-// intimates if a user joins
-socket.on('new_user', userName => {
-	console.log(`${userName} connected`);
-	addAlert(`${userName} connected`, 'success');
-});
+	modal.style.display = "block";
+	nameForm.addEventListener('submit', () => {
+		if (name.value){
+			userName = name.value;
+			localStorage.setItem('name', userName);
+			modal.style.display = "none";
+		}
+		else
+			promptUser();
+	});
+}
 
 // adding message in UI function
 const addChild = (data) => {
 	const messageContainer = document.createElement('li');
 	const userNameContainer = document.createElement('small');
 	const userMessageContainer = document.createElement('p');
-	messageContainer.classList.add('message');
-	messageContainer.classList.add('bg-primary');
+	messageContainer.classList.add('chat-list-item');
 	userNameContainer.innerText = data.user === 'You'? '' : data.user + ': ';
 	messageContainer.append(userNameContainer);
 	// neglecting username for our text
@@ -75,10 +91,10 @@ const addChild = (data) => {
 	messageContainer.append(userMessageContainer);
 	// append our message to right side
 	if (data.user === 'You')
-		messageContainer.classList.add("ourMessage");
+		messageContainer.classList.add("our-message");
 	chatArea.append(messageContainer);
 	messageNumber++;
-	if (messageNumber >= parseInt(windowheight / 80))
+	if (messageNumber >= parseInt(windowHeight / 80))
 		chatArea.firstChild.remove();
 }
 
@@ -94,12 +110,14 @@ const addAlert = (data, type, permanent=false) => {
 	}, 5000);
 }
 
-// toggle light mode
-sun.onclick = e => {
+
+function toggleDarkMode(e) {
+	console.log('in toggleDarkMode')
+	localStorage.setItem('mode', 'dark');
 	body.classList.add('dark');
 }
 
-// toggle dark mode
-moon.onclick = e => {
+function toggleLightMode(e) {
+	localStorage.setItem('mode', 'light');
 	body.classList.remove('dark');
 }

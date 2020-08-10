@@ -16,13 +16,8 @@ users = {};
 io.on("connection", socket => {
 	// sending alerts to othe users about the joining of a new user
 	socket.on('user_connected', userName => {
-		if (Object.values(users).includes(userName)){
-			socket.emit('already_exists', userName);
-		}
-		else{
-			users[socket.id] = userName;
-			socket.broadcast.emit('new_user', userName);
-		}
+		users[socket.id] = userName;
+		socket.broadcast.emit('new_user', userName);
 	});
 
 	// sends the message to other users from the current user
