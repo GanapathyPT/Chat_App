@@ -20,7 +20,6 @@ body {
 	display: flex;
 	justify-content: space-around;
 	align-items: baseline;
-	height: 10vh;
 }
 
 .heading h1 {
@@ -164,6 +163,7 @@ body {
 	.container {
 		padding: 10px;
 		height: 100vh;
+		padding-bottom: calc(10px + 3vh);
 	}
 }
 
@@ -189,6 +189,4 @@ body {
 	text-align: center;
 	padding: 20px;
 	transform: translate(-50%, -50%);
-	/*transform: translateX(-50%);*/
-	/*transform: translateY(-50%);*/
 }

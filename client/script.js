@@ -94,7 +94,7 @@ const addChild = (data) => {
 		messageContainer.classList.add("our-message");
 	chatArea.append(messageContainer);
 	messageNumber++;
-	if (messageNumber >= parseInt(windowHeight / 80))
+	if (messageNumber >= parseInt(windowHeight / 85))
 		chatArea.firstChild.remove();
 }
 
