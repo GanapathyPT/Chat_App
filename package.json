@@ -1,6 +1,6 @@
 {
   "name": "chatApp",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "simple node app implemented without database",
   "main": "index.js",
   "scripts": {
