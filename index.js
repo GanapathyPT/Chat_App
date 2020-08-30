@@ -1,11 +1,16 @@
 // required modules
 const express = require('express');
 const app = express();
-const http = require("http").createServer(app);
+const http = require("http").Server(app);
+const cors = require("cors");
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8000;
 
 const io = require("socket.io")(http);
+// io.set('origins', 'https://localhost:3000');
+
+app.use(cors());
+app.options("*", cors());
 
 // local variable to store our users 
 // database is not yet implemented
@@ -33,7 +38,7 @@ io.on("connection", socket => {
 });
 
 // serving client folder static files
-app.use(express.static('client'));
+app.use(express.static('frontend/build'));
 
 http.listen(port, () => {
 	console.log('Server started at port: ' + port);

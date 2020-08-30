@@ -1,4 +1,4 @@
-// getting some neccessary elements
+// getting some neccessary elements 
 const body = document.getElementById('body');
 const formInput = document.getElementById('formInput');
 const message = document.getElementById('message');
