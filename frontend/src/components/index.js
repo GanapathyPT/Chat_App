@@ -530,6 +530,7 @@ export default function({ themeColor, setThemeColor }) {
 						</DialogContent>
 						<DialogActions>
 							<Button
+								disabled={!userName && userName.length < 3}
 								onClick={setUserNameToLocalStorage}
 								variant="outlined"
 								color="primary"
