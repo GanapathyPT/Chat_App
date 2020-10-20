@@ -47,6 +47,7 @@ export default function({ themeColor, setThemeColor }) {
 
 	const [userName, setUserName] = useState("");
 	const [roomName, setRoomName] = useState("");
+	const [roomPassword, setRoomPassword] = useState("");
 	const [newMessage, setNewMessage] = useState("");
 	const [messages, setMessages] = useState([]);
 	const [users, setUsers] = useState([]);
@@ -121,6 +122,7 @@ export default function({ themeColor, setThemeColor }) {
 		socket.on("left", () => {
 			setInRoom(false);
 			setRoomName("");
+			setRoomPassword("");
 			setUsers([]);
 			setJoinCreateRoomModal(false);
 			setMessages([]);
@@ -144,11 +146,11 @@ export default function({ themeColor, setThemeColor }) {
 	}
 
 	const createRoom = () => {
-		socket.emit("createRoom", { userName, roomName });
+		socket.emit("createRoom", { userName, roomName, roomPassword });
 	}
 
 	const joinRoom = () => {
-		socket.emit("joinRoom", { userName, roomName });
+		socket.emit("joinRoom", { userName, roomName, roomPassword });
 	}
 
 	const leaveRoom = () => {
@@ -173,9 +175,20 @@ export default function({ themeColor, setThemeColor }) {
 	useEffect(() => {
 		if (!!lastMessage.current){
 			lastMessage.current.scrollIntoView();
-			// console.log(lastMessage.current.innerText);
 		}
 	}, [messages])
+
+	useEffect(() => {
+		if (users.length === 1){
+			setAlertMessage({
+				msg: "room will be deleted at 0 members", 
+				badge: "info" 
+			});
+			setTimeout(() => {
+				setAlertMessage({})
+			}, 3000);
+		}
+	}, [users])
 
 	const Theme = () => (
 		<div className="theme-button-container">
@@ -270,7 +283,7 @@ export default function({ themeColor, setThemeColor }) {
 					<Grid item xs={12} style={{marginTop:50}}>
 						{
 							!!alertMessage.msg ?
-							<Alert severity={setAlertMessage.bagde}>
+							<Alert severity={alertMessage.badge}>
 								{ alertMessage.msg }
 							</Alert> : null
 						}
@@ -311,7 +324,7 @@ export default function({ themeColor, setThemeColor }) {
 				<div className="siv">
 					{
 						!!alertMessage.msg ?
-						<Alert severity={setAlertMessage.bagde}>
+						<Alert severity={setAlertMessage.badge}>
 							{ alertMessage.msg }
 						</Alert> : null
 					}
@@ -468,16 +481,29 @@ export default function({ themeColor, setThemeColor }) {
 						<DialogContent className={classes.backgroundChange}>
 							{
 								!!alertMessage.msg ?
-								<Alert severity={setAlertMessage.bagde}>
+								<Alert severity={alertMessage.badge}>
 									{ alertMessage.msg }
 								</Alert> : null
 							}
 							<TextField 
 								autoFocus
 								value={roomName}
-								onChange={e => setRoomName(e.target.value)}
 								type="text"
+								placeholder="Room Name"
 								variant="outlined"
+								style={{ display: "block" }}
+								onChange={e => setRoomName(e.target.value)}
+								InputProps={{
+							        className: classes.textWhite
+								}}
+							/>
+							<TextField 
+								value={roomPassword}
+								type="password"
+								placeholder="Room Password"
+								variant="outlined"
+								style={{ display: "block" }}
+								onChange={e => setRoomPassword(e.target.value)}
 								InputProps={{
 							        className: classes.textWhite
 								}}
@@ -487,6 +513,7 @@ export default function({ themeColor, setThemeColor }) {
 						<DialogActions className={classes.backgroundChange}>
 							<Button onClick={() => {
 								setRoomName("");
+								setRoomPassword("");
 								setJoinCreateRoomModal(false);
 							}}>
 								Cancel
