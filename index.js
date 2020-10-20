@@ -1,43 +1,115 @@
-// required modules
-const express = require('express');
+const express = require("express");
 const app = express();
 const http = require("http").Server(app);
 const cors = require("cors");
 
-const port = process.env.PORT || 8000;
-
 const io = require("socket.io")(http);
-// io.set('origins', 'https://localhost:3000');
+
+const port = process.env.PORT || 8000;
 
 app.use(cors());
 app.options("*", cors());
 
-// local variable to store our users 
-// database is not yet implemented
-// will implemente db soon
-users = {};
+rooms = {};
 
-// executes when a user connects
 io.on("connection", socket => {
-	// sending alerts to othe users about the joining of a new user
-	socket.on('user_connected', userName => {
-		users[socket.id] = userName;
-		socket.broadcast.emit('new_user', userName);
+
+	socket.on("createRoom", ({ userName, roomName }) => {
+
+		if (!userName || !roomName){
+			socket.emit("alert", { msg: "invalid input", badge: "error" });
+			return;
+		}
+
+		if (!!rooms[roomName])
+			socket.emit("alert", { msg: "room already exists", badge: "error" });
+		else {
+			rooms[roomName] = { id: socket.id, users:[userName] };
+			socket.join(socket.id);
+			socket.emit("joined", [userName]);
+			socket.emit("alert", { msg: `created room:- ${roomName}`, badge: "success" })
+
+			socket.username = userName;
+			socket.room = roomName;
+		}
 	});
 
-	// sends the message to other users from the current user
-	socket.on('new_message', newMessage => {
-		socket.broadcast.emit('message_received', {message:newMessage, user:users[socket.id]})
+	socket.on("joinRoom", ({ userName, roomName }) => {
+
+		if (!userName || !roomName){
+			socket.emit("alert", { msg: "invalid input", badge: "error" });
+			return;
+		}
+
+		if (!!rooms[roomName]){
+			socket.join(rooms[roomName].id);
+			rooms[roomName].users.push(userName);
+			socket.emit("joined", rooms[roomName].users);
+			socket
+				.broadcast
+				.to(rooms[roomName].id)
+				.emit("alert", 
+					{ msg: `${userName} joined`, badge: "success" }
+				);
+			socket
+				.broadcast
+				.to(rooms[roomName].id)
+				.emit("userJoined", userName);
+			socket.emit("alert", { msg: `joined to ${roomName}`, badge: "success" })
+
+			socket.username = userName;
+			socket.room = roomName;
+		}
+		else 
+			socket.emit("alert", { msg: "room doesn't exists", badge: "error" });
 	});
 
-	// sending alerts to others about the disconnection of the user
-	socket.on('disconnect', () => {
-		socket.broadcast.emit('user_disconnected', users[socket.id])
+	socket.on("sendNewMessage", ({ userName, roomName, newMessage }) => {
+		socket
+			.broadcast
+			.to(rooms[roomName].id)
+			.emit("receiveMessage", 
+				{ userName, newMessage }
+			);
 	});
+
+	socket.on("leaveRoom", ({ userName, roomName }) => {
+		removeUser(userName, roomName);
+		socket.emit("left");
+	});
+
+	socket.on("disconnect", () => {
+		removeUser(socket.username, socket.room);
+	});
+
+	const removeUser = (userName, roomName) => {
+		const room = rooms[roomName]
+		if (!!room){
+
+			socket.leave(room.id);
+			// const index = room.users.indexOf(userName);
+			rooms[roomName].users = room.users.filter(user => user !== userName);
+
+			socket
+				.broadcast
+				.to(room.id)
+				.emit("alert", 
+					{ msg: `${userName} left`, badge: "error" }
+				);
+			socket
+				.broadcast
+				.to(room.id)
+				.emit("userLeft", userName);
+
+			if (!room.users.length){
+				delete rooms[roomName];
+			}
+		}
+	}
 
 });
 
-// serving client folder static files
+
 app.use(express.static('frontend/build'));
 
 http.listen(port, () => {
